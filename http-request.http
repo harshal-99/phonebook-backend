@@ -1,0 +1,60 @@
+# Test name must unique
+POST http://localhost:3001/api/persons
+Content-Type: application/json
+
+{
+  "name": "Arto Hellas",
+  "number": "1234"
+}
+
+###
+# Test if name and number are missing
+POST http://localhost:3001/api/persons
+Content-Type: application/json
+
+{}
+
+###
+# Test if name is missing
+POST http://localhost:3001/api/persons
+Content-Type: application/json
+
+{
+  "number": "123456789"
+}
+
+###
+# Test if number is missing
+POST http://localhost:3001/api/persons
+Content-Type: application/json
+
+{
+  "name": "harshal"
+}
+
+###
+POST http://localhost:3001/api/persons
+Content-Type: application/json
+
+{
+  "name": "harshal",
+  "number": "123456789"
+}
+
+###
+DELETE http://localhost:3001/api/persons/{{id}}
+Accept: application/json
+
+###
+GET http://localhost:3001/api/persons/{{id}}
+Accept: application/json
+
+###
+GET http://localhost:3001/info
+Accept: text/html
+
+###
+GET http://localhost:3001/api/persons
+Accept: application/json
+
+###
