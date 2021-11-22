@@ -1,6 +1,6 @@
 import express from "express"
 import morgan  from "morgan"
-import cors from "cors"
+import cors    from "cors"
 
 const app = express()
 
@@ -39,6 +39,7 @@ const unknownEndpoint = (request, response) => {
 	response.status(404).send({error: 'unknown endpoint'})
 }
 
+app.use(express.static('build'))
 app.use(express.json())
 app.use(morgan('tiny'))
 app.use(cors())
