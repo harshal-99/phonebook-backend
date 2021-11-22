@@ -1,5 +1,6 @@
 import express from "express"
 import morgan  from "morgan"
+import cors from "cors"
 
 const app = express()
 
@@ -40,6 +41,7 @@ const unknownEndpoint = (request, response) => {
 
 app.use(express.json())
 app.use(morgan('tiny'))
+app.use(cors())
 
 
 app.get('/api/persons', (req, res) => {
