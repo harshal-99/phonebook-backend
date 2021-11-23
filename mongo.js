@@ -5,14 +5,14 @@ dotenv.config()
 
 
 mongoose.connect(process.env.MONGODB_URI)
-	.then(res => console.log('connected'))
+	.then(res => console.log("connected"))
 
 const personSchema = new mongoose.Schema({
 	name: String,
 	number: String
 })
 
-const Person = mongoose.model('Person', personSchema)
+const Person = mongoose.model("Person", personSchema)
 
 if (process.argv.length < 4) {
 	Person.find({})
@@ -22,7 +22,7 @@ if (process.argv.length < 4) {
 			})
 			mongoose.connection.close()
 				.then(() => {
-					console.log('connection closed')
+					console.log("connection closed")
 				})
 		})
 		.catch(err => console.log(err))
@@ -38,7 +38,7 @@ if (process.argv.length < 4) {
 			console.log(`added ${person.name} number ${person.number} to phonebook`)
 			mongoose.connection.close()
 				.then(() => {
-					console.log('connection closed')
+					console.log("connection closed")
 				})
 		})
 }
