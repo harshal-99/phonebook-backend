@@ -3,11 +3,8 @@ import dotenv   from "dotenv"
 
 dotenv.config()
 
-const password = process.env.MONGODB_PASSWORD;
 
-const url = `mongodb+srv://harshal:${password}@cluster0.phqea.mongodb.net/phonebook?retryWrites=true&w=majority`;
-
-mongoose.connect(url)
+mongoose.connect(process.env.MONGODB_URI)
 	.then(res => console.log('connected'))
 
 const personSchema = new mongoose.Schema({

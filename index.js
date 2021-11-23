@@ -2,7 +2,7 @@ import express from "express"
 import morgan  from "morgan"
 import cors    from "cors"
 
-const app = express()
+import Person from "./modles/phonebook.js";
 
 let persons = [
 	{
@@ -27,13 +27,7 @@ let persons = [
 	}
 ]
 
-const requestLogger = (request, response, next) => {
-	console.log('Method:', request.method)
-	console.log('Path:  ', request.path)
-	console.log('Body:  ', request.body)
-	console.log('---')
-	next()
-}
+const app = express()
 
 const unknownEndpoint = (request, response) => {
 	response.status(404).send({error: 'unknown endpoint'})
@@ -41,23 +35,28 @@ const unknownEndpoint = (request, response) => {
 
 app.use(express.static('build'))
 app.use(express.json())
-app.use(morgan('tiny'))
+app.use(morgan((tokens, req, res) => {
+	return [
+		tokens.method(req, res),
+		tokens.url(req, res),
+		tokens.status(req, res),
+		tokens['response-time'](req, res), 'ms',
+		tokens.req.body
+	].join(' ')
+}))
 app.use(cors())
 
 
 app.get('/api/persons', (req, res) => {
-	res.json(persons)
+	Person.find({}).then(persons => {
+		res.json(persons)
+	})
 })
 
 app.get('/api/persons/:id', (req, res) => {
-	const id = Number(req.params.id)
-	const person = persons.find(person => person.id === id)
-
-	if (person) {
+	Person.findById(req.params.id).then(person => {
 		res.json(person)
-	} else {
-		res.status(404).end()
-	}
+	})
 })
 
 app.post('/api/persons', (req, res) => {
@@ -81,30 +80,23 @@ app.post('/api/persons', (req, res) => {
 		})
 	}
 
-	let result = persons.find(person => person.name === body.name)
-
-	if (result) {
-		return res.status(404).json({
-			error: 'name must be unique'
-		})
-	}
-
-	const person = {
-		id: Math.random() * 100,
+	const person = new Person({
 		name: body.name,
 		number: body.number
-	}
+	})
 
-	persons = persons.concat(person)
+	person.save().then(savedPerson => {
+		res.json(savedPerson)
+	})
 
-	res.json(person)
 })
 
-app.delete('/api/persons/:id', (req, res) => {
-	const id = Number(req.params.id)
-	persons = persons.filter(person => person.id !== id)
-	res.json({message: `id ${id} deleted`})
-	res.status(204).end()
+app.delete('/api/persons/:id', (req, res, next) => {
+	Person.findByIdAndRemove(req.params.id)
+		.then(result => {
+			res.status(204).end()
+		})
+		.catch(error => next(error))
 })
 
 app.get('/info', (req, res) => {
@@ -116,6 +108,16 @@ app.get('/info', (req, res) => {
 
 app.use(unknownEndpoint)
 
+const errorHandler = (error, request, response, next) => {
+	console.log(error.message)
+
+	if (error.name === 'CastError') {
+		return response.status(400).send({error: 'malformatted id'})
+	}
+	next(error)
+}
+
+app.use(errorHandler)
 
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
