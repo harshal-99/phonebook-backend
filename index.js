@@ -59,7 +59,7 @@ app.get('/api/persons/:id', (req, res) => {
 	})
 })
 
-app.post('/api/persons', (req, res) => {
+app.post('/api/persons', (req, res, next) => {
 	const body = req.body
 
 	if (!body.name && !body.number) {
@@ -80,14 +80,29 @@ app.post('/api/persons', (req, res) => {
 		})
 	}
 
-	const person = new Person({
-		name: body.name,
-		number: body.number
+
+	Person.find({name: body.name}, (err, docs) => {
+		if (docs) {
+			const person = {
+				name: body.name,
+				number: body.number
+			}
+			Person.findByIdAndUpdate(docs._id, person, {new: true})
+				.then(updatedPerson => {
+					res.json(updatedPerson)
+				})
+				.catch(error => next(error))
+		} else {
+			const person = new Person({
+				name: body.name,
+				number: body.number
+			})
+			person.save().then(savedPerson => {
+				res.json(savedPerson)
+			})
+		}
 	})
 
-	person.save().then(savedPerson => {
-		res.json(savedPerson)
-	})
 
 })
 

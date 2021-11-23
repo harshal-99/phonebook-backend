@@ -1,3 +1,13 @@
+# update existing user's number
+POST http://localhost:3001/api/persons
+Content-Type: application/json
+
+{
+  "name": "hp",
+  "number": "1234567890000"
+}
+
+###
 # Test name must unique
 POST http://localhost:3001/api/persons
 Content-Type: application/json
