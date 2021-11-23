@@ -58,30 +58,18 @@ app.post('/api/persons', (req, res, next) => {
 		})
 	}
 
-
-	Person.find({name: body.name}, (err, docs) => {
-		if (docs) {
-			const person = {
-				name: body.name,
-				number: body.number
-			}
-			Person.findByIdAndUpdate(docs._id, person, {new: true})
-				.then(updatedPerson => {
-					res.json(updatedPerson)
-				})
-				.catch(error => next(error))
-		} else {
-			const person = new Person({
-				name: body.name,
-				number: body.number
-			})
-			person.save().then(savedPerson => {
-				res.json(savedPerson)
-			})
-		}
+	const person = new Person({
+		name: body.name,
+		number: body.number
 	})
 
-
+	person.save()
+		.then(savedPerson => {
+			res.json(savedPerson)
+		})
+		.catch(error => {
+			next(error)
+		})
 })
 
 app.delete('/api/persons/:id', (req, res, next) => {
@@ -106,10 +94,19 @@ app.get('/info', (req, res, next) => {
 app.use(unknownEndpoint)
 
 const errorHandler = (error, request, response, next) => {
-	console.log(error.message)
+	// console.log(error.message)
 
+	console.log(error)
 	if (error.name === 'CastError') {
 		return response.status(400).send({error: 'malformatted id'})
+	} else if (error.name === 'ValidationError') {
+		if (error.kind === 'minlength') {
+			return response.status(400).send({error: 'min length is not satisfied'})
+		} else if (error.kind === 'unique') {
+			return response.status(400).send({error: 'name already exists'})
+		}
+	} else {
+		return response.status(400).send({error: error.message})
 	}
 	next(error)
 }
